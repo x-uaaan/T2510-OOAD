@@ -1,0 +1,54 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+CURSOR RULES FOR UNIVERSITY EVENT MANAGEMENT SYSTEM
+1. Client Requirements Alignment
+All code, features, and UI must strictly adhere to the client requirements as outlined in the project overview and requirements.
+No feature or logic should be added that contradicts or omits any specified requirement.
+2. Object-Oriented Design
+All classes must follow object-oriented principles: encapsulation, inheritance, and polymorphism.
+Favor composition over inheritance where appropriate.
+All entities (Event, Participant, Registration, Service, etc.) must be represented as classes with clear responsibilities.
+3. Extensibility & Maintainability
+The system must be designed for easy future expansion:
+New event types, registration schemes, and discount strategies should be addable with minimal code changes.
+Use interfaces, abstract classes, and design patterns (e.g., Strategy, Factory) where extensibility is required.
+Avoid hardcoding event types, services, or discount logic.
+4. GUI Requirements
+All user interactions must be implemented using Java Swing.
+The UI must be attractive, intuitive, and provide clear feedback for all user actions.
+Navigation between features (event creation, registration, fee breakdown, etc.) must be smooth and logical.
+5. Event Management
+Event organizers must be able to create, update, and cancel events.
+Each event must store: name, date, venue, type, capacity, and registration fee (if applicable).
+Supported event types: Seminars, Workshops, Cultural Events, Sports Events (must be easily extendable).
+6. Registration System
+Both students and staff can register for events.
+Registration must support:
+Base registration fee.
+Optional additional services (e.g., catering, transportation).
+Discounts (early bird, group registration, etc.).
+Registration must check event capacity and prevent overbooking.
+7. Fee Calculation & Breakdown
+The system must calculate and display:
+Base fee, additional services, discounts applied.
+Total before discount, discount amount, and net payable amount.
+The fee breakdown must be clear and detailed in the UI.
+8. Discounts
+Discount logic (early bird, group registration) must be implemented using a strategy pattern or similar, to allow easy addition of new discount types.
+9. Code Quality
+All code must be well-documented, with clear class/method comments.
+Use meaningful variable and method names.
+Follow Java best practices and conventions.
+10. Testing & Validation
+All features must be tested for correctness, including edge cases (e.g., full events, invalid input).
+Input validation must be present for all user inputs.
+11. No External Dependencies
+The application must be standalone and not require any external libraries beyond standard Java and Swing.
+12. Diagram Consistency
+All code and features must be consistent with the provided UML class, sequence, and use case diagrams.
+Any deviation from diagrams must be justified and documented.
+
+Every request, code change, or feature must be checked against these rules. If a request violates any rule, it must be rejected or revised to comply.
