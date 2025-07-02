@@ -1,0 +1,2 @@
+registrationId,eventId,userId,eventName,userName,registrationDate,pax,catering,transportation,promoCodeUsed,baseAmount,discountAmount,totalAmount,status
+R0001,E0001,U0001,dsgs,Current User,2025-07-02 18:56:32,10,false,false,STUDENT10,26.5,25.299999999999997,1.2000000000000028,Confirmed

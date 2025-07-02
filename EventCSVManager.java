@@ -11,7 +11,7 @@ public class EventCSVManager {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     // CSV Header
-    private static final String CSV_HEADER = "eventId,name,organiser,eventType,venue,capacity,date,fee,earlyBirdEnabled,earlyBirdEnd,promoEnabled,promoCode,promoDiscount";
+    private static final String CSV_HEADER = "eventId,name,organiser,eventType,venue,capacity,date,fee,description,fixedCost,variableCost,earlyBirdEnabled,earlyBirdEnd,earlyBirdDiscountType,earlyBirdDiscountValue,promoEnabled,promoCode,promoDiscountType,promoDiscount,status";
     
     /**
      * Save events to CSV file
@@ -152,6 +152,9 @@ public class EventCSVManager {
         sb.append(event.getCapacity()).append(CSV_SEPARATOR);
         sb.append(DATE_FORMAT.format(event.getDate())).append(CSV_SEPARATOR);
         sb.append(event.getFee()).append(CSV_SEPARATOR);
+        sb.append(escapeCSV(event.getDescription())).append(CSV_SEPARATOR);
+        sb.append(event.getFixedCost()).append(CSV_SEPARATOR);
+        sb.append(event.getVariableCost()).append(CSV_SEPARATOR);
         
         // Early bird fields
         sb.append(event.isEarlyBirdEnabled()).append(CSV_SEPARATOR);
@@ -159,6 +162,8 @@ public class EventCSVManager {
             sb.append(DATE_FORMAT.format(event.getEarlyBirdEnd()));
         }
         sb.append(CSV_SEPARATOR);
+        sb.append(escapeCSV(event.getEarlyBirdDiscountType())).append(CSV_SEPARATOR);
+        sb.append(event.getEarlyBirdDiscountValue()).append(CSV_SEPARATOR);
         
         // Promo fields
         sb.append(event.isPromoEnabled()).append(CSV_SEPARATOR);
@@ -166,7 +171,10 @@ public class EventCSVManager {
             sb.append(escapeCSV(event.getPromoCode()));
         }
         sb.append(CSV_SEPARATOR);
+        sb.append(escapeCSV(event.getPromoDiscountType())).append(CSV_SEPARATOR);
         sb.append(event.getPromoDiscount());
+        sb.append(CSV_SEPARATOR);
+        sb.append(escapeCSV(event.getStatus()));
         
         return sb.toString();
     }
@@ -177,8 +185,8 @@ public class EventCSVManager {
     private static EventData csvLineToEvent(String csvLine) {
         String[] fields = parseCSVLine(csvLine);
         
-        if (fields.length < 13) {
-            throw new IllegalArgumentException("Invalid CSV line format - expected 13 fields, got " + fields.length);
+        if (fields.length < 20) {
+            throw new IllegalArgumentException("Invalid CSV line format - expected 20 fields, got " + fields.length);
         }
         
         try {
@@ -193,21 +201,28 @@ public class EventCSVManager {
             int capacity = Integer.parseInt(fields[5]);
             Date date = DATE_FORMAT.parse(fields[6]);
             double fee = Double.parseDouble(fields[7]);
+            String description = fields[8];
+            double fixedCost = Double.parseDouble(fields[9]);
+            double variableCost = Double.parseDouble(fields[10]);
             
             // Parse early bird fields
-            boolean earlyBirdEnabled = Boolean.parseBoolean(fields[8]);
-            Date earlyBirdEnd = null;
-            if (!fields[9].trim().isEmpty()) {
-                earlyBirdEnd = DATE_FORMAT.parse(fields[9]);
-            }
+            boolean earlyBirdEnabled = Boolean.parseBoolean(fields[11]);
+            Date earlyBirdEnd = fields[12].isEmpty() ? null : DATE_FORMAT.parse(fields[12]);
+            String earlyBirdDiscountType = fields[13].trim().isEmpty() ? null : fields[13];
+            double earlyBirdDiscountValue = Double.parseDouble(fields[14]);
             
             // Parse promo fields
-            boolean promoEnabled = Boolean.parseBoolean(fields[10]);
-            String promoCode = fields[11].trim().isEmpty() ? null : fields[11];
-            double promoDiscount = Double.parseDouble(fields[12]);
+            boolean promoEnabled = Boolean.parseBoolean(fields[15]);
+            String promoCode = fields[16].trim().isEmpty() ? null : fields[16];
+            String promoDiscountType = fields[17].trim().isEmpty() ? null : fields[17];
+            double promoDiscount = Double.parseDouble(fields[18]);
             
-            return new EventData(eventId, name, organiser, eventType, venue, capacity, date, fee,
-                    earlyBirdEnabled, earlyBirdEnd, promoEnabled, promoCode, promoDiscount);
+            // Parse status
+            String status = (fields.length > 19 && fields[19] != null && !fields[19].isEmpty()) ? fields[19] : "Active";
+            
+            return new EventData(eventId, name, organiser, eventType, venue, capacity, date, fee, description, fixedCost, variableCost,
+                    earlyBirdEnabled, earlyBirdEnd, earlyBirdDiscountType, earlyBirdDiscountValue, 
+                    promoEnabled, promoCode, promoDiscountType, promoDiscount, status);
                     
         } catch (ParseException | NumberFormatException e) {
             throw new IllegalArgumentException("Error parsing CSV fields: " + e.getMessage());

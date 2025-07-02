@@ -81,6 +81,15 @@ public class UserCSVManager {
         users.add(user);
         saveUsersToCSV(users);
         System.out.println("Added user to CSV: " + user.getUserName());
+        
+        // Automatically create platform vouchers for new user
+        try {
+            VoucherCSVManager.createNewUserVouchers(user.getUserId());
+            VoucherCSVManager.createGroupOrderVouchers(user.getUserId());
+            System.out.println("Created platform vouchers for new user: " + user.getUserName());
+        } catch (Exception e) {
+            System.err.println("Error creating platform vouchers for user " + user.getUserName() + ": " + e.getMessage());
+        }
     }
     
     /**

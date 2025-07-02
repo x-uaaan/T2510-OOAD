@@ -1,3 +1,2 @@
-eventId,name,organiser,eventType,venue,capacity,date,fee,earlyBirdEnabled,earlyBirdEnd,promoEnabled,promoCode,promoDiscount
-E0001,dfhdfh,Aikido Club,Workshop,Multipurpose Hall (MPH),10,2025-07-02 08:00:00,65.4,false,,false,,0.0
-E0002,gfb,Cyberjaya Accounting Club,Cultural Event,Multipurpose Hall (MPH),10,2025-07-02 08:00:00,69.3,false,,false,,0.0
+eventId,name,organiser,eventType,venue,capacity,date,fee,description,fixedCost,variableCost,earlyBirdEnabled,earlyBirdEnd,earlyBirdDiscountType,earlyBirdDiscountValue,promoEnabled,promoCode,promoDiscountType,promoDiscount,status
+E0001,dfsbdb,Arabian Cultural Society,Workshop,Multipurpose Hall (MPH),1000,2025-07-02 08:00:00,13.0,gergrger,3000.0,10.0,false,,,0.0,false,,,0.0,Active

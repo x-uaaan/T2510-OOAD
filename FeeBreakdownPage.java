@@ -5,9 +5,9 @@ import javax.swing.*;
 
 // Add FeeBreakdownPage class
 class FeeBreakdownPage extends JFrame {
-    public FeeBreakdownPage(EventData event, int pax, boolean catering, boolean transport, String appliedPromoCode) {
+    public FeeBreakdownPage(EventData event, int pax, boolean catering, boolean transport, String appliedVoucherCode) {
         setTitle("Fee Breakdown");
-        setSize(500, 550);
+        setSize(500, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -26,42 +26,59 @@ class FeeBreakdownPage extends JFrame {
         panel.add(makeDetailLabel("Venue: ", event.getVenue()));
         panel.add(makeDetailLabel("Date: ", sdf.format(event.getDate())));
         panel.add(makeDetailLabel("Time: ", stf.format(event.getDate())));
-        panel.add(makeDetailLabel("Capacity: ", String.valueOf(event.getCapacity())));
         panel.add(makeDetailLabel("Fee: ", String.format("RM %.2f", event.getFee())));
         panel.add(Box.createVerticalStrut(10));
 
-        double baseFee = event.getFee();
-        double cateringFee = catering ? 20.0 : 0.0;
-        double transportFee = transport ? 10.0 : 0.0;
-        double addServices = (cateringFee + transportFee);
-        double totalBeforeDiscount = (baseFee + addServices) * pax;
-        double groupDiscount = 0.15;
-        double discount = 0;
-        StringBuilder discountDetails = new StringBuilder();
-        if (event.isEarlyBirdEnabled() && event.getEarlyBirdEnd() != null) {
-            long now = System.currentTimeMillis();
-            if (now <= event.getEarlyBirdEnd().getTime()) {
-                discount += totalBeforeDiscount * 0.10;
-                discountDetails.append(String.format("Early Bird (10%%): -RM %.2f\n", totalBeforeDiscount * 0.10));
+
+        // Use centralized fee calculation to ensure consistency with PaymentPage
+        FeeCalculator.FeeBreakdown breakdown = FeeCalculator.calculateFees(
+            event, pax, catering, transport, appliedVoucherCode);
+        
+        final double totalDiscounts = breakdown.totalDiscount;
+        final double netPayable = breakdown.netPay;
+        
+        // Build the fee breakdown in the requested format
+        StringBuilder bill = new StringBuilder();
+        
+        // Base Fee
+        bill.append(String.format("Base Fee: RM %.2f\n", breakdown.baseFee));
+        
+        // Additional Services (only show if there are any)
+        if (breakdown.cateringCost > 0 || breakdown.transportCost > 0) {
+            bill.append("Additional Services:\n");
+            if (breakdown.cateringCost > 0) {
+                bill.append(String.format("• Catering: RM %.2f\n", breakdown.cateringCost));
+            }
+            if (breakdown.transportCost > 0) {
+                bill.append(String.format("• Transport: RM %.2f\n", breakdown.transportCost));
             }
         }
-        if (pax >= 5) {
-            discount += totalBeforeDiscount * groupDiscount;
-            discountDetails.append(String.format("Group (15%%): -RM %.2f\n", totalBeforeDiscount * groupDiscount));
+        
+        // Subtotal (base + additional services)
+        bill.append(String.format("Subtotal: RM %.2f\n", breakdown.subtotal));
+        
+        // Show voucher details if any were applied
+        if (breakdown.appliedVoucherDetails != null && breakdown.appliedVoucherDetails.trim().length() > 0) {
+            bill.append("\nVoucher Applied:\n");
+            bill.append(breakdown.appliedVoucherDetails);
         }
-        if (event.isPromoEnabled() && appliedPromoCode != null && appliedPromoCode.equals(event.getPromoCode())) {
-            double promoDisc = event.getPromoDiscount() / 100.0;
-            discount += totalBeforeDiscount * promoDisc;
-            discountDetails.append(String.format("Promo (%s, %.0f%%): -RM %.2f\n", event.getPromoCode(), event.getPromoDiscount(), totalBeforeDiscount * promoDisc));
+        
+        // Discount Amount (only show if there are discounts)
+        if (totalDiscounts > 0) {
+            bill.append(String.format("Discount Amount: RM %.2f\n", totalDiscounts));
+            if (breakdown.earlyBirdDiscount > 0) {
+                bill.append(String.format("    Early Bird: -RM %.2f\n", breakdown.earlyBirdDiscount));
+            }
+            if (breakdown.groupOrderDiscount > 0) {
+                bill.append(String.format("    Group Order: -RM %.2f\n", breakdown.groupOrderDiscount));
+            }
         }
-        double netPayable = totalBeforeDiscount - discount;
-        StringBuilder bill = new StringBuilder();
-        bill.append(String.format("Base Fee:           RM %.2f\n", baseFee * pax));
-        bill.append(String.format("Additional Services: RM %.2f\n", addServices * pax));
-        bill.append(String.format("Total Before Disc.:  RM %.2f\n", totalBeforeDiscount));
-        bill.append(discountDetails);
-        bill.append(String.format("Discount Amount:     RM %.2f\n", discount));
-        bill.append(String.format("Net Payable:         RM %.2f", netPayable));
+        
+        // Service Tax (6% of after-discount amount)
+        bill.append(String.format("Service Tax (6%%): RM %.2f\n", breakdown.serviceTax));
+        
+        // Net Pay
+        bill.append(String.format("Net Pay: RM %.2f", netPayable));
 
         JPanel billPanel = new JPanel();
         billPanel.setLayout(new BoxLayout(billPanel, BoxLayout.Y_AXIS));
@@ -78,7 +95,68 @@ class FeeBreakdownPage extends JFrame {
         add(panel, BorderLayout.CENTER);
 
         payButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Pay successfully, register successfully");
+            // Process payment and create records
+            try {
+                // Get current logged in user (this would need to be passed from login system)
+                // For now, using a default user - this should be integrated with login system
+                String userId = "U0001"; // This should come from logged in user
+                String userName = "Current User"; // This should come from logged in user
+                String userType = "STUDENT"; // This should come from logged in user
+                
+                // Generate IDs
+                String registrationId = RegistrationCSVManager.generateNextRegistrationId();
+                String paymentId = PaymentCSVManager.generateNextPaymentId();
+                String attendanceId = AttendanceCSVManager.generateNextAttendanceId();
+                
+                // Create registration record
+                RegistrationData registration = new RegistrationData(
+                    registrationId, event.getEventId(), userId, event.getName(), userName,
+                    pax, catering, transport, appliedVoucherCode, netPayable
+                );
+                registration.setBaseAmount(breakdown.subtotal);
+                registration.setDiscountAmount(totalDiscounts);
+                registration.setStatus("Confirmed");
+                RegistrationCSVManager.addRegistrationToCSV(registration);
+                
+                // Create payment record
+                PaymentData payment = new PaymentData(
+                    paymentId, registrationId, userId, event.getEventId(),
+                    userName, event.getName(), netPayable, "Cash", "Completed"
+                );
+                PaymentCSVManager.addPaymentToCSV(payment);
+                
+                // Create attendance record when payment is completed
+                AttendanceData attendance = new AttendanceData(
+                    attendanceId, userId, userName, event.getEventId(), event.getName(),
+                    netPayable, paymentId, registrationId
+                );
+                AttendanceCSVManager.addAttendanceToCSV(attendance);
+                
+                // Deactivate welcome voucher after first registration
+                VoucherCSVManager.deactivateWelcomeVoucherForUser(userId);
+                
+                // Increment voucher usage if vouchers were used
+                if (appliedVoucherCode != null && !appliedVoucherCode.trim().isEmpty()) {
+                    String[] voucherCodes = appliedVoucherCode.split(",");
+                    for (String code : voucherCodes) {
+                        code = code.trim();
+                        if (!code.isEmpty()) {
+                            VoucherCSVManager.incrementVoucherUsage(code);
+                        }
+                    }
+                }
+                
+                JOptionPane.showMessageDialog(this, 
+                    String.format("Payment successful!\n\nRegistration ID: %s\nPayment ID: %s\nAttendance ID: %s", 
+                    registrationId, paymentId, attendanceId));
+                    
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error processing payment: " + ex.getMessage(), 
+                    "Payment Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
             // Close all open registration/payment windows and return to event list
             Window[] windows = Window.getWindows();
             for (Window w : windows) {

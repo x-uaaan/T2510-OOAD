@@ -1,3 +1,6 @@
+run program using this command 
+java -cp ".;javax.mail.jar;activation.jar" EventManagementApp
+
 # University Event Management System
 
 ## Overview

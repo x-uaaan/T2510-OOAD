@@ -29,9 +29,14 @@ class CreateEventWindow extends JFrame {
     protected JSpinner earlyBirdEndDateSpinner;
     protected JComboBox<String> earlyBirdHourBox;
     protected JComboBox<String> earlyBirdMinuteBox;
+    protected JComboBox<String> earlyBirdDiscountTypeBox;
+    protected JTextField earlyBirdDiscountValueField;
     protected JCheckBox promoCodeCheckBox;
     protected JTextField promoCodeField;
+    protected JComboBox<String> promoDiscountTypeBox;
     protected JTextField promoDiscountField;
+    protected JPanel earlyBirdDiscountRowPanel;
+    protected JPanel promoDiscountRowPanel;
 
     public CreateEventWindow(EventManagementApp mainApp) {
         this.mainApp = mainApp;
@@ -280,10 +285,18 @@ class CreateEventWindow extends JFrame {
 
         // --- Early Bird Section ---
         gbc.gridx = 0; gbc.gridy++;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0;
         earlyBirdCheckBox = new JCheckBox("Enable Early Bird Discount");
         formPanel.add(earlyBirdCheckBox, gbc);
         gbc.gridx = 1;
-        JPanel earlyBirdPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        JPanel earlyBirdRightPanel = new JPanel();
+        earlyBirdRightPanel.setLayout(new BoxLayout(earlyBirdRightPanel, BoxLayout.X_AXIS));
+        earlyBirdRightPanel.add(Box.createHorizontalGlue());
+        earlyBirdRightPanel.add(new JLabel("Until: "));
         SpinnerDateModel earlyBirdDateModel = new SpinnerDateModel(new Date(), null, null, Calendar.DAY_OF_MONTH);
         earlyBirdEndDateSpinner = new JSpinner(earlyBirdDateModel);
         JSpinner.DateEditor earlyBirdDateEditor = new JSpinner.DateEditor(earlyBirdEndDateSpinner, "yyyy-MM-dd");
@@ -292,30 +305,116 @@ class CreateEventWindow extends JFrame {
         for (int i = 0; i <= 16; i++) ebHours[i] = String.format("%02d", i + 8);
         earlyBirdHourBox = new JComboBox<>(ebHours);
         earlyBirdMinuteBox = new JComboBox<>(minutes);
-        earlyBirdPanel.add(earlyBirdEndDateSpinner);
-        earlyBirdPanel.add(new JLabel(":"));
-        earlyBirdPanel.add(earlyBirdHourBox);
-        earlyBirdPanel.add(earlyBirdMinuteBox);
-        formPanel.add(earlyBirdPanel, gbc);
-        earlyBirdPanel.setVisible(false);
-        earlyBirdCheckBox.addActionListener(e -> earlyBirdPanel.setVisible(earlyBirdCheckBox.isSelected()));
-
+        earlyBirdRightPanel.add(earlyBirdEndDateSpinner);
+        earlyBirdRightPanel.add(new JLabel(" "));
+        earlyBirdRightPanel.add(earlyBirdHourBox);
+        earlyBirdRightPanel.add(new JLabel(":"));
+        earlyBirdRightPanel.add(earlyBirdMinuteBox);
+        formPanel.add(earlyBirdRightPanel, gbc);
+        // Early Bird Discount Configuration
+        gbc.gridx = 0; gbc.gridy++;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0;
+        JPanel earlyBirdDiscountRowPanel = new JPanel(new BorderLayout());
+        JLabel earlyBirdDiscountLabel = new JLabel("Early Bird Discount: ");
+        earlyBirdDiscountRowPanel.add(earlyBirdDiscountLabel, BorderLayout.WEST);
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        JPanel earlyBirdDiscountPanel = new JPanel();
+        earlyBirdDiscountPanel.setLayout(new BoxLayout(earlyBirdDiscountPanel, BoxLayout.X_AXIS));
+        earlyBirdDiscountPanel.add(Box.createHorizontalGlue());
+        String[] discountTypes = {"PERCENTAGE", "FIXED_AMOUNT"};
+        earlyBirdDiscountTypeBox = new JComboBox<>(discountTypes);
+        earlyBirdDiscountValueField = new JTextField(6);
+        earlyBirdDiscountPanel.add(earlyBirdDiscountTypeBox);
+        earlyBirdDiscountPanel.add(Box.createHorizontalStrut(8));
+        earlyBirdDiscountPanel.add(earlyBirdDiscountValueField);
+        JLabel discountUnitLabel = new JLabel("%");
+        earlyBirdDiscountPanel.add(Box.createHorizontalStrut(4));
+        earlyBirdDiscountPanel.add(discountUnitLabel);
+        earlyBirdDiscountRowPanel.add(earlyBirdDiscountPanel, BorderLayout.CENTER);
+        formPanel.add(earlyBirdDiscountRowPanel, gbc);
+        // Hide early bird panels initially
+        earlyBirdRightPanel.setVisible(false);
+        earlyBirdDiscountRowPanel.setVisible(false);
+        // Update discount unit label based on type selection
+        earlyBirdDiscountTypeBox.addActionListener(e -> {
+            String selectedType = (String) earlyBirdDiscountTypeBox.getSelectedItem();
+            if ("PERCENTAGE".equals(selectedType)) {
+                discountUnitLabel.setText("%");
+            } else {
+                discountUnitLabel.setText("RM");
+            }
+        });
+        earlyBirdCheckBox.addActionListener(e -> {
+            boolean isSelected = earlyBirdCheckBox.isSelected();
+            earlyBirdRightPanel.setVisible(isSelected);
+            earlyBirdDiscountRowPanel.setVisible(isSelected);
+        });
         // --- Promotion Code Section ---
         gbc.gridx = 0; gbc.gridy++;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0;
         promoCodeCheckBox = new JCheckBox("Enable Promotion Code");
         formPanel.add(promoCodeCheckBox, gbc);
         gbc.gridx = 1;
-        JPanel promoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        JPanel promoRightPanel = new JPanel();
+        promoRightPanel.setLayout(new BoxLayout(promoRightPanel, BoxLayout.X_AXIS));
+        promoRightPanel.add(Box.createHorizontalGlue());
+        promoRightPanel.add(new JLabel("Code: "));
         promoCodeField = new JTextField(8);
-        promoDiscountField = new JTextField(4);
-        promoPanel.add(new JLabel("Code: "));
-        promoPanel.add(promoCodeField);
-        promoPanel.add(Box.createHorizontalStrut(10));
-        promoPanel.add(new JLabel("Discount %: "));
-        promoPanel.add(promoDiscountField);
-        formPanel.add(promoPanel, gbc);
-        promoPanel.setVisible(false);
-        promoCodeCheckBox.addActionListener(e -> promoPanel.setVisible(promoCodeCheckBox.isSelected()));
+        promoRightPanel.add(promoCodeField);
+        formPanel.add(promoRightPanel, gbc);
+        // Promo Discount Configuration
+        gbc.gridx = 0; gbc.gridy++;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 0;
+        JPanel promoDiscountRowPanel = new JPanel(new BorderLayout());
+        JLabel promoDiscountLabel = new JLabel("Promo Discount: ");
+        promoDiscountRowPanel.add(promoDiscountLabel, BorderLayout.WEST);
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        JPanel promoDiscountPanel = new JPanel();
+        promoDiscountPanel.setLayout(new BoxLayout(promoDiscountPanel, BoxLayout.X_AXIS));
+        promoDiscountPanel.add(Box.createHorizontalGlue());
+        String[] promoDiscountTypes = {"PERCENTAGE", "FIXED_AMOUNT"};
+        promoDiscountTypeBox = new JComboBox<>(promoDiscountTypes);
+        promoDiscountField = new JTextField(6);
+        promoDiscountPanel.add(promoDiscountTypeBox);
+        promoDiscountPanel.add(Box.createHorizontalStrut(8));
+        promoDiscountPanel.add(promoDiscountField);
+        JLabel promoDiscountUnitLabel = new JLabel("%");
+        promoDiscountPanel.add(Box.createHorizontalStrut(4));
+        promoDiscountPanel.add(promoDiscountUnitLabel);
+        promoDiscountRowPanel.add(promoDiscountPanel, BorderLayout.CENTER);
+        formPanel.add(promoDiscountRowPanel, gbc);
+        // Hide promo panels initially
+        promoRightPanel.setVisible(false);
+        promoDiscountRowPanel.setVisible(false);
+        // Update discount unit label based on type selection
+        promoDiscountTypeBox.addActionListener(e -> {
+            String selectedType = (String) promoDiscountTypeBox.getSelectedItem();
+            if ("PERCENTAGE".equals(selectedType)) {
+                promoDiscountUnitLabel.setText("%");
+            } else {
+                promoDiscountUnitLabel.setText("RM");
+            }
+        });
+        promoCodeCheckBox.addActionListener(e -> {
+            boolean isSelected = promoCodeCheckBox.isSelected();
+            promoRightPanel.setVisible(isSelected);
+            promoDiscountRowPanel.setVisible(isSelected);
+        });
+        // Make row panels accessible for UpdateEventWindow
+        this.earlyBirdDiscountRowPanel = earlyBirdDiscountRowPanel;
+        this.promoDiscountRowPanel = promoDiscountRowPanel;
 
         // Create Button
         gbc.gridx = 0; gbc.gridy++;
@@ -367,6 +466,15 @@ class CreateEventWindow extends JFrame {
         String name = eventNameField.getText().trim();
         String organiser = (String) organiserBox.getSelectedItem();
         String desc = descriptionArea.getText().trim();
+        String fixedStr = fixedCostField.getText().trim();
+        String varStr = variableCostField.getText().trim();
+        double fixedCost = 0, variableCost = 0;
+        try {
+            fixedCost = Double.parseDouble(fixedStr);
+        } catch (Exception e) { fixedCost = 0; }
+        try {
+            variableCost = Double.parseDouble(varStr);
+        } catch (Exception e) { variableCost = 0; }
         Date date = (Date) dateSpinner.getValue();
         String hourStr = (String) hourBox.getSelectedItem();
         String minStr = (String) minuteBox.getSelectedItem();
@@ -429,6 +537,8 @@ class CreateEventWindow extends JFrame {
         // Early bird
         boolean earlyBirdEnabled = earlyBirdCheckBox.isSelected();
         Date earlyBirdEnd = null;
+        String earlyBirdDiscountType = null;
+        double earlyBirdDiscountValue = 0;
         if (earlyBirdEnabled) {
             Date ebDate = (Date) earlyBirdEndDateSpinner.getValue();
             String ebHour = (String) earlyBirdHourBox.getSelectedItem();
@@ -440,30 +550,63 @@ class CreateEventWindow extends JFrame {
             ebCal.set(Calendar.SECOND, 0);
             ebCal.set(Calendar.MILLISECOND, 0);
             earlyBirdEnd = ebCal.getTime();
+            
+            // Early bird discount validation
+            earlyBirdDiscountType = (String) earlyBirdDiscountTypeBox.getSelectedItem();
+            String discountValueStr = earlyBirdDiscountValueField.getText().trim();
+            if (discountValueStr.isEmpty()) {
+                feedbackLabel.setText("Please enter early bird discount value.");
+                feedbackLabel.setForeground(Color.RED);
+                return;
+            }
+            try {
+                earlyBirdDiscountValue = Double.parseDouble(discountValueStr);
+                if (earlyBirdDiscountValue <= 0) throw new NumberFormatException();
+                if ("PERCENTAGE".equals(earlyBirdDiscountType) && earlyBirdDiscountValue >= 100) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException ex) {
+                String message = "PERCENTAGE".equals(earlyBirdDiscountType) ? 
+                    "Early bird discount percentage must be between 0 and 100." : 
+                    "Early bird discount amount must be greater than 0.";
+                feedbackLabel.setText(message);
+                feedbackLabel.setForeground(Color.RED);
+                return;
+            }
         }
         // Promo code
         boolean promoEnabled = promoCodeCheckBox.isSelected();
         String promoCode = null;
+        String promoDiscountType = null;
         double promoDiscount = 0;
         if (promoEnabled) {
             promoCode = promoCodeField.getText().trim();
+            promoDiscountType = (String) promoDiscountTypeBox.getSelectedItem();
             String promoDiscStr = promoDiscountField.getText().trim();
             if (promoCode.isEmpty() || promoDiscStr.isEmpty()) {
-                feedbackLabel.setText("Please enter promo code and discount.");
+                feedbackLabel.setText("Please enter promo code and discount value.");
                 feedbackLabel.setForeground(Color.RED);
                 return;
             }
             try {
                 promoDiscount = Double.parseDouble(promoDiscStr);
-                if (promoDiscount <= 0 || promoDiscount >= 100) throw new NumberFormatException();
+                if (promoDiscount <= 0) throw new NumberFormatException();
+                if ("PERCENTAGE".equals(promoDiscountType) && promoDiscount >= 100) {
+                    throw new NumberFormatException();
+                }
             } catch (NumberFormatException ex) {
-                feedbackLabel.setText("Promo discount must be between 0 and 100.");
+                String message = "PERCENTAGE".equals(promoDiscountType) ? 
+                    "Promo discount percentage must be between 0 and 100." : 
+                    "Promo discount amount must be greater than 0.";
+                feedbackLabel.setText(message);
                 feedbackLabel.setForeground(Color.RED);
                 return;
             }
         }
         // Add event to main app and close window
-        EventData event = new EventData(name, organiser, eventType, fullVenue, capacity, eventDateTime, fee, earlyBirdEnabled, earlyBirdEnd, promoEnabled, promoCode, promoDiscount);
+        EventData event = new EventData(name, organiser, eventType, fullVenue, capacity, eventDateTime, fee, desc, fixedCost, variableCost, 
+            earlyBirdEnabled, earlyBirdEnd, earlyBirdDiscountType, earlyBirdDiscountValue, 
+            promoEnabled, promoCode, promoDiscountType, promoDiscount, "Active");
         mainApp.addEvent(event);
         dispose();
     }

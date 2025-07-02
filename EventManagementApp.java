@@ -11,17 +11,15 @@ public class EventManagementApp extends JFrame {
     private JPanel eventListPanel;
     private JScrollPane eventListScroll;
     private JButton createEventButton;
-    private JButton saveButton;
-    private JButton loadButton;
-    private JButton csvInfoButton;
 
     public EventManagementApp() {
         // Set window title with user info
         String title = "Event Management System - CSV Storage";
-        if (LoginRegisterWindow.isUserLoggedIn()) {
-            UserData user = LoginRegisterWindow.getLoggedInUser();
-            title += " - Welcome, " + user.getUserName();
-        }
+        // TODO: Integrate with login system
+        // if (LoginRegisterWindow.isUserLoggedIn()) {
+        //     UserData user = LoginRegisterWindow.getLoggedInUser();
+        //     title += " - Welcome, " + user.getUserName();
+        // }
         
         setTitle(title);
         setSize(800, 400);
@@ -39,34 +37,33 @@ public class EventManagementApp extends JFrame {
         eventListScroll.setBorder(BorderFactory.createEmptyBorder());
         add(eventListScroll, BorderLayout.CENTER);
 
-        // Create button panel with CSV management buttons
+        // Create button panel with essential buttons only
         JPanel buttonPanel = new JPanel();
         createEventButton = new JButton("Create Event");
-        saveButton = new JButton("Save to CSV");
-        loadButton = new JButton("Reload from CSV");
-        csvInfoButton = new JButton("CSV Info");
+        JButton viewVouchersButton = new JButton("View Vouchers");
         JButton logoutButton = new JButton("Logout");
         
         buttonPanel.add(createEventButton);
-        buttonPanel.add(saveButton);
-        buttonPanel.add(loadButton);
-        buttonPanel.add(csvInfoButton);
+        buttonPanel.add(viewVouchersButton);
         buttonPanel.add(logoutButton);
         add(buttonPanel, BorderLayout.SOUTH);
 
         // Button actions
         createEventButton.addActionListener(e -> showCreateEventWindow());
-        saveButton.addActionListener(e -> saveEventsToCSV());
-        loadButton.addActionListener(e -> reloadEventsFromCSV());
-        csvInfoButton.addActionListener(e -> showCSVInfo());
+        viewVouchersButton.addActionListener(e -> showVoucherListWindow());
         logoutButton.addActionListener(e -> handleLogout());
         
         // Add window closing listener to auto-save
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                saveEventsToCSV();
-                System.out.println("Application closing - events saved to CSV");
+                // Auto-save events on close (silent operation)
+                try {
+                    EventCSVManager.saveEventsToCSV(eventList);
+                    System.out.println("Application closing - events saved to CSV");
+                } catch (Exception e) {
+                    System.err.println("Error saving events on close: " + e.getMessage());
+                }
                 System.exit(0);
             }
         });
@@ -77,6 +74,18 @@ public class EventManagementApp extends JFrame {
     private void showCreateEventWindow() {
         CreateEventWindow createEventWindow = new CreateEventWindow(this);
         createEventWindow.setVisible(true);
+    }
+    
+    private void showVoucherListWindow() {
+        // Get user type from logged in user if available
+        String userType = "STUDENT"; // Default - TODO: integrate with login system
+        // if (LoginRegisterWindow.isUserLoggedIn()) {
+        //     UserData user = LoginRegisterWindow.getLoggedInUser();
+        //     userType = user.getUserType();
+        // }
+        
+        VoucherListWindow voucherWindow = new VoucherListWindow(userType);
+        voucherWindow.setVisible(true);
     }
 
     public void addEvent(EventData event) {
@@ -121,8 +130,28 @@ public class EventManagementApp extends JFrame {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+                // Set background color based on status
+                Color bgColor = Color.WHITE;
+                String status = event.getStatus() != null ? event.getStatus() : "Ongoing";
+                boolean isFull = event.getCapacity() == 0;
+                boolean isCancelled = "Cancelled".equalsIgnoreCase(status);
+                boolean isClosedSoon = false;
+                long millisToEvent = event.getDate().getTime() - System.currentTimeMillis();
+                long daysToEvent = millisToEvent / (1000 * 60 * 60 * 24);
+                if (!isFull && !isCancelled) {
+                    if (daysToEvent < 3 || event.getCapacity() < 10) {
+                        isClosedSoon = true;
+                    }
+                }
+                if (isFull) {
+                    bgColor = new Color(230, 230, 230); // light grey
+                } else if (isCancelled) {
+                    bgColor = new Color(100, 100, 100); // dark grey
+                } else if (isClosedSoon) {
+                    bgColor = new Color(255, 255, 180); // yellow
+                }
+                g2.setColor(bgColor);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 0);
                 g2.setColor(new Color(220, 220, 220));
                 g2.setStroke(new BasicStroke(1.5f));
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
@@ -131,8 +160,8 @@ public class EventManagementApp extends JFrame {
         };
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setOpaque(false);
-        card.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 5));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        card.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
 
         JLabel titleLabel = new JLabel(event.getName());
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
@@ -155,14 +184,40 @@ public class EventManagementApp extends JFrame {
         detailsLabel.setForeground(Color.GRAY);
         card.add(detailsLabel);
 
+        // Add status label
+        String statusText = event.getStatus() != null ? event.getStatus() : "Ongoing";
+        boolean isFull = event.getCapacity() == 0;
+        boolean isCancelled = "Cancelled".equalsIgnoreCase(statusText);
+        boolean isClosedSoon = false;
+        long millisToEvent = event.getDate().getTime() - System.currentTimeMillis();
+        long daysToEvent = millisToEvent / (1000 * 60 * 60 * 24);
+        if (!isFull && !isCancelled) {
+            if (daysToEvent < 3 || event.getCapacity() < 10) {
+                isClosedSoon = true;
+            }
+        }
+        String statusLabelText = "";
+        if (isFull) statusLabelText = "FULL";
+        else if (isCancelled) statusLabelText = "CANCELLED";
+        else if (isClosedSoon) statusLabelText = "CLOSED SOON";
+        else statusLabelText = statusText.toUpperCase();
+        JLabel statusLabel = new JLabel(statusLabelText);
+        statusLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
+        if (isFull) statusLabel.setForeground(new Color(120, 120, 120));
+        else if (isCancelled) statusLabel.setForeground(new Color(60, 60, 60));
+        else if (isClosedSoon) statusLabel.setForeground(new Color(180, 140, 0));
+        else statusLabel.setForeground(new Color(0, 120, 0));
+        card.add(statusLabel);
+
         card.setAlignmentX(Component.LEFT_ALIGNMENT);
         return card;
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // Start with login window first
-            new LoginRegisterWindow(null).setVisible(true);
+            // Start with main app directly for now - TODO: integrate login
+            new EventManagementApp().setVisible(true);
+            // new LoginRegisterWindow(null).setVisible(true);
         });
     }
 
@@ -174,7 +229,7 @@ public class EventManagementApp extends JFrame {
         refreshEventList();
     }
     
-    // CSV Operations
+    // CSV Operations - Core functionality for automatic operations
     public void loadEventsFromCSV() {
         try {
             List<EventData> loadedEvents = EventCSVManager.loadEventsFromCSV();
@@ -191,60 +246,31 @@ public class EventManagementApp extends JFrame {
         }
     }
     
-    private void saveEventsToCSV() {
-        try {
-            EventCSVManager.saveEventsToCSV(eventList);
-            JOptionPane.showMessageDialog(this, 
-                "Events saved successfully to CSV!", 
-                "Save Complete", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception e) {
-            System.err.println("Error saving events: " + e.getMessage());
-            JOptionPane.showMessageDialog(this, 
-                "Error saving events to CSV: " + e.getMessage(), 
-                "Save Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    private void reloadEventsFromCSV() {
-        int result = JOptionPane.showConfirmDialog(this,
-            "This will reload events from CSV and discard any unsaved changes.\nContinue?",
-            "Reload Confirmation", JOptionPane.YES_NO_OPTION);
-            
-        if (result == JOptionPane.YES_OPTION) {
-            loadEventsFromCSV();
-            refreshEventList();
-            JOptionPane.showMessageDialog(this, 
-                "Events reloaded from CSV successfully!", 
-                "Reload Complete", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-    
     private void handleLogout() {
         int result = JOptionPane.showConfirmDialog(this,
             "Are you sure you want to logout?",
             "Logout Confirmation", JOptionPane.YES_NO_OPTION);
             
         if (result == JOptionPane.YES_OPTION) {
-            // Save current data
-            saveEventsToCSV();
+            // Auto-save current data before logout
+            try {
+                EventCSVManager.saveEventsToCSV(eventList);
+                System.out.println("Events saved before logout");
+            } catch (Exception e) {
+                System.err.println("Error saving events during logout: " + e.getMessage());
+            }
             
-            // Logout user
-            LoginRegisterWindow.logoutUser();
+            // Logout user - TODO: integrate with login system
+            // LoginRegisterWindow.logoutUser();
             
             // Close current window
             this.dispose();
             
-            // Show login window
-            new LoginRegisterWindow(null).setVisible(true);
+            // Show login window - TODO: integrate with login system
+            // new LoginRegisterWindow(null).setVisible(true);
+            
+            // For now, just exit the application
+            System.exit(0);
         }
-    }
-    
-    private void showCSVInfo() {
-        String info = EventCSVManager.getCSVInfo();
-        int eventCount = eventList.size();
-        String message = info + "\nEvents in memory: " + eventCount;
-        
-        JOptionPane.showMessageDialog(this, message, 
-            "CSV Information", JOptionPane.INFORMATION_MESSAGE);
     }
 }

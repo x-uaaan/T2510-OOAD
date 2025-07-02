@@ -38,10 +38,10 @@ class EventDetailsWindow extends JFrame {
         buttonPanel.setBackground(Color.WHITE);
         JButton registerButton = new JButton("Register");
         JButton updateButton = new JButton("Update");
-        JButton deleteButton = new JButton("Delete");
+        JButton attendeesButton = new JButton("Attendees");
         buttonPanel.add(registerButton);
         buttonPanel.add(updateButton);
-        buttonPanel.add(deleteButton);
+        buttonPanel.add(attendeesButton);
         add(buttonPanel, BorderLayout.SOUTH);
 
         registerButton.addActionListener(e -> {
@@ -55,19 +55,9 @@ class EventDetailsWindow extends JFrame {
             this.setVisible(false);
         });
 
-        deleteButton.addActionListener(e -> {
-            int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this event?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-            if (result == JOptionPane.YES_OPTION) {
-                // Remove event from main list
-                Window[] windows = Window.getWindows();
-                for (Window w : windows) {
-                    if (w instanceof EventManagementApp) {
-                        ((EventManagementApp) w).deleteEvent(event);
-                        break;
-                    }
-                }
-                this.dispose();
-            }
+        attendeesButton.addActionListener(e -> {
+            AttendeeListWindow attendeeListWindow = new AttendeeListWindow(event);
+            attendeeListWindow.setVisible(true);
         });
     }
 

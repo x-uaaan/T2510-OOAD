@@ -1,0 +1,9 @@
+voucherId,voucherCode,voucherType,discountType,discountValue,description,validFrom,validUntil,usageLimit,usedCount,minimumAmount,minimumPax,applicableEvents,userTypeEligible,isActive,createdBy,createdDate
+V0001,WELCOME10,PROMO_CODE,FIXED_AMOUNT,10.0,Welcome Promo - RM10 off your first event registration,2025-07-02 15:49:57,2025-10-02 15:49:57,-1,0,0.0,1,ALL,ALL,true,SYSTEM,2025-07-02 15:49:57
+V0002,STUDENT10,STUDENT,PERCENTAGE,10.0,Student Discount - 10% off for students,2025-07-02 17:04:16,2026-07-02 17:04:16,1,0,0.0,1,ALL,STUDENT,true,SYSTEM,2025-07-02 17:04:16
+V0003,GROUP1,GROUP_ORDER,PERCENTAGE,10.0,Group Order Discount #1 - RM30 off for 5+ participants,2025-07-02 17:04:16,2026-07-02 17:04:16,1,0,0.0,5,ALL,ALL,true,SYSTEM,2025-07-02 17:04:16
+V0004,GROUP2,GROUP_ORDER,PERCENTAGE,10.0,Group Order Discount #2 - RM30 off for 5+ participants,2025-07-02 17:04:16,2026-07-02 17:04:16,1,0,0.0,5,ALL,ALL,true,SYSTEM,2025-07-02 17:04:16
+V0005,GROUP3,GROUP_ORDER,PERCENTAGE,10.0,Group Order Discount #3 - RM30 off for 5+ participants,2025-07-02 17:04:16,2026-07-02 17:04:16,1,0,0.0,5,ALL,ALL,true,SYSTEM,2025-07-02 17:04:16
+V0006,GROUP4,GROUP_ORDER,PERCENTAGE,10.0,Group Order Discount #4 - RM30 off for 5+ participants,2025-07-02 17:04:16,2026-07-02 17:04:16,1,0,0.0,5,ALL,ALL,true,SYSTEM,2025-07-02 17:04:16
+V0007,GROUP5,GROUP_ORDER,PERCENTAGE,10.0,Group Order Discount #5 - RM30 off for 5+ participants,2025-07-02 17:04:16,2026-07-02 17:04:16,1,0,0.0,5,ALL,ALL,true,SYSTEM,2025-07-02 17:04:16
+V0008,SYPK,PROMO_CODE,FIXED_AMOUNT,10.0,ewt,2025-07-02 00:00:00,2025-10-02 00:00:00,-1,0,25.0,3,ALL,ALL,true,ADMIN,2025-07-02 20:39:25
