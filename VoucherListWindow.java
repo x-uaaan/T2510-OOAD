@@ -74,7 +74,9 @@ public class VoucherListWindow extends JFrame {
         if (currentEvent != null) {
             buttonPanel.add(testVoucherButton);
         }
-        buttonPanel.add(addVoucherButton);
+        if ("Admin".equalsIgnoreCase(currentUserType)) {
+            buttonPanel.add(addVoucherButton);
+        }
         
         // Status panel
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -113,11 +115,9 @@ public class VoucherListWindow extends JFrame {
             for (VoucherData voucher : allVouchers) {
                 // Show only active vouchers that are applicable to current user
                 if (voucher.isCurrentlyValid()) {
-                    // Check user type eligibility
-                    if ("ALL".equals(voucher.getUserTypeEligible()) || 
-                        voucher.getUserTypeEligible().equals(currentUserType)) {
-                        
-                        // Check if user has already used this voucher
+                    // Show if userTypeEligible is ALL or matches current user type
+                    if ("ALL".equalsIgnoreCase(voucher.getUserTypeEligible()) ||
+                        voucher.getUserTypeEligible().equalsIgnoreCase(currentUserType)) {
                         if (!VoucherCSVManager.hasUserUsedVoucher(currentUserId, voucher.getVoucherCode())) {
                             availableVouchers.add(voucher);
                         }

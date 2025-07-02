@@ -1,2 +1,2 @@
 attendanceId,userId,userName,eventId,eventName,paidAmount,attendanceTimestamp,paymentId,registrationId,attendanceStatus,notes
-A0001,U0001,Current User,E0001,dsgs,1.2000000000000028,2025-07-02 18:56:32,P0001,R0001,Registered,
+A0001,U0001,Current User,E0002,aaa,42.4,2025-07-03 03:34:45,P0001,R0001,Registered,

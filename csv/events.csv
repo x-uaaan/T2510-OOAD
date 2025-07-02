@@ -1,2 +1,4 @@
 eventId,name,organiser,eventType,venue,capacity,date,fee,description,fixedCost,variableCost,earlyBirdEnabled,earlyBirdEnd,earlyBirdDiscountType,earlyBirdDiscountValue,promoEnabled,promoCode,promoDiscountType,promoDiscount,status
+E0004,Event 1,Badminton Club,Seminar,Venue: Faculty | FCI | CQAR2006,100,2025-07-20 14:00:00,12.0,testing,1200.0,0.0,true,2025-07-05 08:00:00,PERCENTAGE,5.0,false,,,0.0,Ongoing
+E0005,aaa,Aikido Club,Seminar,Stadium,100,2025-07-10 12:00:00,30.0,qwrqewr,2000.0,10.0,true,2025-07-03 08:00:00,FIXED_AMOUNT,10.0,true,AAAiko,PERCENTAGE,5.0,Cancelled
 E0001,dfsbdb,Arabian Cultural Society,Workshop,Multipurpose Hall (MPH),1000,2025-07-02 08:00:00,13.0,gergrger,3000.0,10.0,false,,,0.0,false,,,0.0,Active

@@ -11,6 +11,7 @@ public class EventManagementApp extends JFrame {
     private JPanel eventListPanel;
     private JScrollPane eventListScroll;
     private JButton createEventButton;
+    private String userType = "STUDENT"; // Default, should be set from login
 
     public EventManagementApp() {
         // Set window title with user info
@@ -119,7 +120,7 @@ public class EventManagementApp extends JFrame {
     }
 
     private void showEventDetailsWindow(EventData event) {
-        EventDetailsWindow detailsWindow = new EventDetailsWindow(event, this);
+        EventDetailsWindow detailsWindow = new EventDetailsWindow(event, this, userType);
         detailsWindow.setVisible(true);
     }
 
@@ -215,9 +216,15 @@ public class EventManagementApp extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // Start with main app directly for now - TODO: integrate login
-            new EventManagementApp().setVisible(true);
-            // new LoginRegisterWindow(null).setVisible(true);
+            // INTEGRATED LOGIN FLOW
+            // Show login window first, then main app after successful login
+            LoginRegisterWindow loginWindow = new LoginRegisterWindow((UserData loggedInUser) -> {
+                // This code runs after successful login
+                EventManagementApp app = new EventManagementApp();
+                // Optionally, pass user info to app if needed
+                app.setVisible(true);
+            });
+            loginWindow.setVisible(true);
         });
     }
 

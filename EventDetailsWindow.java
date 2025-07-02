@@ -7,9 +7,11 @@ import javax.swing.*;
 class EventDetailsWindow extends JFrame {
     private EventData event;
     private EventManagementApp mainApp;
-    public EventDetailsWindow(EventData event, EventManagementApp mainApp) {
+    private String userType;
+    public EventDetailsWindow(EventData event, EventManagementApp mainApp, String userType) {
         this.mainApp = mainApp;
         this.event = event;
+        this.userType = userType;
         setTitle("Event Details");
         setSize(400, 400);
         setLocationRelativeTo(null);
@@ -40,8 +42,10 @@ class EventDetailsWindow extends JFrame {
         JButton updateButton = new JButton("Update");
         JButton attendeesButton = new JButton("Attendees");
         buttonPanel.add(registerButton);
-        buttonPanel.add(updateButton);
-        buttonPanel.add(attendeesButton);
+        if ("Admin".equalsIgnoreCase(userType)) {
+            buttonPanel.add(updateButton);
+            buttonPanel.add(attendeesButton);
+        }
         add(buttonPanel, BorderLayout.SOUTH);
 
         registerButton.addActionListener(e -> {

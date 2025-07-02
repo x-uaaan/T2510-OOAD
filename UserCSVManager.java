@@ -82,14 +82,17 @@ public class UserCSVManager {
         saveUsersToCSV(users);
         System.out.println("Added user to CSV: " + user.getUserName());
         
-        // Automatically create platform vouchers for new user
-        try {
-            VoucherCSVManager.createNewUserVouchers(user.getUserId());
-            VoucherCSVManager.createGroupOrderVouchers(user.getUserId());
-            System.out.println("Created platform vouchers for new user: " + user.getUserName());
-        } catch (Exception e) {
-            System.err.println("Error creating platform vouchers for user " + user.getUserName() + ": " + e.getMessage());
+        // Platform voucher assignment (no new voucher creation)
+        System.out.println("Assigning platform vouchers to user: " + user.getUserName());
+        System.out.println("User can use: WELCOME10, GROUPORDER");
+        if ("STUDENT".equalsIgnoreCase(user.getUserType())) {
+            System.out.println("User can use: STUDENT10");
+        } else if ("STAFF".equalsIgnoreCase(user.getUserType())) {
+            System.out.println("User can use: STAFF10");
         }
+        // No voucher creation here; eligibility is checked at redemption time.
+        // VoucherCSVManager.createNewUserVouchers(user.getUserId());
+        // VoucherCSVManager.createGroupOrderVouchers(user.getUserId());
     }
     
     /**
