@@ -342,11 +342,28 @@ public class VoucherCSVManager {
      */
     public static VoucherData getUserStudentVoucher(String userId) {
         List<VoucherData> vouchers = loadVouchersFromCSV();
-        String expectedCode = "STUDENT10_" + userId;
         
         for (VoucherData voucher : vouchers) {
             if ("STUDENT".equals(voucher.getVoucherType()) && 
-                expectedCode.equals(voucher.getVoucherCode()) &&
+                "STUDENT10".equals(voucher.getVoucherCode()) &&
+                voucher.isCurrentlyValid() &&
+                voucher.getUsedCount() < voucher.getUsageLimit()) {
+                return voucher;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Check if user has staff voucher available
+     */
+    public static VoucherData getUserStaffVoucher(String userId) {
+        List<VoucherData> vouchers = loadVouchersFromCSV();
+        
+        for (VoucherData voucher : vouchers) {
+            if ("STAFF".equals(voucher.getVoucherType()) && 
+                "STAFF10".equals(voucher.getVoucherCode()) &&
                 voucher.isCurrentlyValid() &&
                 voucher.getUsedCount() < voucher.getUsageLimit()) {
                 return voucher;
@@ -362,14 +379,12 @@ public class VoucherCSVManager {
     public static VoucherData getUserGroupOrderVoucher(String userId) {
         List<VoucherData> vouchers = loadVouchersFromCSV();
         
-        // Look for any available group voucher for this user (GROUP1_, GROUP2_, etc.)
         for (VoucherData voucher : vouchers) {
             if ("GROUP_ORDER".equals(voucher.getVoucherType()) && 
-                voucher.getVoucherCode().contains("_" + userId) &&
-                voucher.getVoucherCode().startsWith("GROUP") &&
+                "GROUPORDER".equals(voucher.getVoucherCode()) &&
                 voucher.isCurrentlyValid() &&
                 voucher.getUsedCount() < voucher.getUsageLimit()) {
-                return voucher; // Return the first available group voucher
+                return voucher;
             }
         }
         
@@ -379,7 +394,7 @@ public class VoucherCSVManager {
     /**
      * Auto-apply platform vouchers based on conditions
      */
-    public static List<VoucherData> getAutoApplicablePlatformVouchers(String userId, int pax) {
+    public static List<VoucherData> getAutoApplicablePlatformVouchers(String userId, int pax, String userType) {
         List<VoucherData> autoVouchers = new ArrayList<>();
         
         // Check for welcome voucher
@@ -388,10 +403,17 @@ public class VoucherCSVManager {
             autoVouchers.add(welcomeVoucher);
         }
         
-        // Check for student voucher  
-        VoucherData studentVoucher = getUserStudentVoucher(userId);
-        if (studentVoucher != null) {
-            autoVouchers.add(studentVoucher);
+        // Check for user type specific vouchers
+        if ("STUDENT".equalsIgnoreCase(userType)) {
+            VoucherData studentVoucher = getUserStudentVoucher(userId);
+            if (studentVoucher != null) {
+                autoVouchers.add(studentVoucher);
+            }
+        } else if ("STAFF".equalsIgnoreCase(userType)) {
+            VoucherData staffVoucher = getUserStaffVoucher(userId);
+            if (staffVoucher != null) {
+                autoVouchers.add(staffVoucher);
+            }
         }
         
         // Check for group order voucher (ONLY if pax >= 5)

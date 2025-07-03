@@ -23,6 +23,10 @@ class PaymentPage extends JFrame {
 
     public PaymentPage(EventData event) {
         this.event = event;
+        
+        // Get current user type from login
+        UserData currentUser = LoginRegisterWindow.getLoggedInUser();
+        this.currentUserType = (currentUser != null) ? currentUser.getUserType() : "STUDENT";
         setTitle("Event Registration & Payment");
         setSize(500, 650);
         setLocationRelativeTo(null);
@@ -187,25 +191,37 @@ class PaymentPage extends JFrame {
     
     private void checkAndApplyPlatformVouchers() {
         try {
-            // Assume current user ID is U0001 - in real implementation this would come from login
-            String currentUserId = "U0001"; // TODO: Get from login session
+            // Get current user info from login
+            UserData currentUser = LoginRegisterWindow.getLoggedInUser();
+            String currentUserId = (currentUser != null) ? currentUser.getUserId() : "U0001";
+            String userType = (currentUser != null) ? currentUser.getUserType() : currentUserType;
             
             // Get auto-applicable platform vouchers
-            List<VoucherData> autoVouchers = VoucherCSVManager.getAutoApplicablePlatformVouchers(currentUserId, confirmedPax);
+            List<VoucherData> autoVouchers = VoucherCSVManager.getAutoApplicablePlatformVouchers(currentUserId, confirmedPax, userType);
             
             if (!autoVouchers.isEmpty()) {
-                // Apply the first available platform voucher (priority: NEW_USER > GROUP_ORDER)
+                // Apply the first available platform voucher (priority: WELCOME > STUDENT/STAFF > GROUP_ORDER)
                 VoucherData selectedVoucher = null;
                 
-                // Prioritize NEW_USER voucher
+                // Prioritize WELCOME voucher
                 for (VoucherData voucher : autoVouchers) {
-                    if ("NEW_USER".equals(voucher.getVoucherType())) {
+                    if ("WELCOME".equals(voucher.getVoucherType()) || "PROMO_CODE".equals(voucher.getVoucherType())) {
                         selectedVoucher = voucher;
                         break;
                     }
                 }
                 
-                // If no NEW_USER voucher, use GROUP_ORDER voucher
+                // If no WELCOME voucher, use STUDENT/STAFF voucher
+                if (selectedVoucher == null) {
+                    for (VoucherData voucher : autoVouchers) {
+                        if ("STUDENT".equals(voucher.getVoucherType()) || "STAFF".equals(voucher.getVoucherType())) {
+                            selectedVoucher = voucher;
+                            break;
+                        }
+                    }
+                }
+                
+                // If no STUDENT/STAFF voucher, use GROUP_ORDER voucher
                 if (selectedVoucher == null) {
                     for (VoucherData voucher : autoVouchers) {
                         if ("GROUP_ORDER".equals(voucher.getVoucherType())) {

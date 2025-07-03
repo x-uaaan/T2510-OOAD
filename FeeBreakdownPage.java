@@ -95,7 +95,7 @@ class FeeBreakdownPage extends JFrame {
         add(panel, BorderLayout.CENTER);
 
         payButton.addActionListener(e -> {
-            // Process payment and create records
+            // Process registration and save to registrations.csv only
             try {
                 // Get current logged in user from login system
                 UserData user = LoginRegisterWindow.getLoggedInUser();
@@ -103,10 +103,8 @@ class FeeBreakdownPage extends JFrame {
                 String userName = user != null ? user.getUserName() : "";
                 String userType = user != null ? user.getUserType() : "";
                 
-                // Generate IDs
+                // Generate registration ID
                 String registrationId = RegistrationCSVManager.generateNextRegistrationId();
-                String paymentId = PaymentCSVManager.generateNextPaymentId();
-                String attendanceId = AttendanceCSVManager.generateNextAttendanceId();
                 
                 // Create registration record
                 RegistrationData registration = new RegistrationData(
@@ -117,20 +115,6 @@ class FeeBreakdownPage extends JFrame {
                 registration.setDiscountAmount(totalDiscounts);
                 registration.setStatus("Confirmed");
                 RegistrationCSVManager.addRegistrationToCSV(registration);
-                
-                // Create payment record
-                PaymentData payment = new PaymentData(
-                    paymentId, registrationId, userId, event.getEventId(),
-                    userName, event.getName(), netPayable, "Cash", "Completed"
-                );
-                PaymentCSVManager.addPaymentToCSV(payment);
-                
-                // Create attendance record when payment is completed
-                AttendanceData attendance = new AttendanceData(
-                    attendanceId, userId, userName, event.getEventId(), event.getName(),
-                    netPayable, paymentId, registrationId
-                );
-                AttendanceCSVManager.addAttendanceToCSV(attendance);
                 
                 // Deactivate welcome voucher after first registration
                 VoucherCSVManager.deactivateWelcomeVoucherForUser(userId);
@@ -147,13 +131,13 @@ class FeeBreakdownPage extends JFrame {
                 }
                 
                 JOptionPane.showMessageDialog(this, 
-                    String.format("Payment successful!\n\nRegistration ID: %s\nPayment ID: %s\nAttendance ID: %s", 
-                    registrationId, paymentId, attendanceId));
-                    
+                    String.format("Registration successful!\n\nRegistration ID: %s", 
+                    registrationId));
+                
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Error processing payment: " + ex.getMessage(), 
-                    "Payment Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error processing registration: " + ex.getMessage(), 
+                    "Registration Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
