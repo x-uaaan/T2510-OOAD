@@ -61,7 +61,7 @@ public class LoginRegisterWindow extends JFrame {
 
         gbc.gridx = 0;
         gbc.gridy++;
-        JButton sendOtpAndLoginBtn = new JButton("Send OTP & Login");
+        JButton sendOtpAndLoginBtn = new JButton("Login via OTP");
         panel.add(sendOtpAndLoginBtn, gbc);
         gbc.gridx = 1;
 

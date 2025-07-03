@@ -21,9 +21,11 @@ class EventData {
     private String description;
     private double fixedCost;
     private double variableCost;
+    private String authorId;
+    private String authorName;
     
     // Full constructor with eventId
-    public EventData(String eventId, String name, String organiser, String eventType, String venue, int capacity, Date date, double fee, String description, double fixedCost, double variableCost, boolean earlyBirdEnabled, Date earlyBirdEnd, String earlyBirdDiscountType, double earlyBirdDiscountValue, boolean promoEnabled, String promoCode, String promoDiscountType, double promoDiscount, String status) {
+    public EventData(String eventId, String name, String organiser, String eventType, String venue, int capacity, Date date, double fee, String description, double fixedCost, double variableCost, boolean earlyBirdEnabled, Date earlyBirdEnd, String earlyBirdDiscountType, double earlyBirdDiscountValue, boolean promoEnabled, String promoCode, String promoDiscountType, double promoDiscount, String status, String authorId, String authorName) {
         this.eventId = eventId;
         this.name = name;
         this.organiser = organiser;
@@ -44,15 +46,17 @@ class EventData {
         this.promoDiscountType = promoDiscountType;
         this.promoDiscount = promoDiscount;
         this.status = status == null ? "Active" : status;
+        this.authorId = authorId;
+        this.authorName = authorName;
     }
     
     // Constructor without eventId (auto-generate)
-    public EventData(String name, String organiser, String eventType, String venue, int capacity, Date date, double fee, String description, double fixedCost, double variableCost, boolean earlyBirdEnabled, Date earlyBirdEnd, String earlyBirdDiscountType, double earlyBirdDiscountValue, boolean promoEnabled, String promoCode, String promoDiscountType, double promoDiscount, String status) {
-        this(EventCSVManager.generateNextEventId(), name, organiser, eventType, venue, capacity, date, fee, description, fixedCost, variableCost, earlyBirdEnabled, earlyBirdEnd, earlyBirdDiscountType, earlyBirdDiscountValue, promoEnabled, promoCode, promoDiscountType, promoDiscount, status);
+    public EventData(String name, String organiser, String eventType, String venue, int capacity, Date date, double fee, String description, double fixedCost, double variableCost, boolean earlyBirdEnabled, Date earlyBirdEnd, String earlyBirdDiscountType, double earlyBirdDiscountValue, boolean promoEnabled, String promoCode, String promoDiscountType, double promoDiscount, String status, String authorId, String authorName) {
+        this(EventCSVManager.generateNextEventId(), name, organiser, eventType, venue, capacity, date, fee, description, fixedCost, variableCost, earlyBirdEnabled, earlyBirdEnd, earlyBirdDiscountType, earlyBirdDiscountValue, promoEnabled, promoCode, promoDiscountType, promoDiscount, status, authorId, authorName);
     }
     // Backward compatible constructor
     public EventData(String name, String organiser, String eventType, String venue, int capacity, Date date, double fee) {
-        this(name, organiser, eventType, venue, capacity, date, fee, "", 0, 0, false, null, null, 0.0, false, null, null, 0, "Active");
+        this(name, organiser, eventType, venue, capacity, date, fee, "", 0, 0, false, null, null, 0.0, false, null, null, 0, "Active", null, null);
     }
     public String getEventId() { return eventId; }
     public String getName() { return name; }
@@ -79,6 +83,8 @@ class EventData {
     public void setFixedCost(double fixedCost) { this.fixedCost = fixedCost; }
     public double getVariableCost() { return variableCost; }
     public void setVariableCost(double variableCost) { this.variableCost = variableCost; }
+    public String getAuthorId() { return authorId; }
+    public String getAuthorName() { return authorName; }
     
     // Helper method to calculate promo discount amount
     public double calculatePromoDiscount(double amount) {

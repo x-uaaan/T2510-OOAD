@@ -11,7 +11,7 @@ public class EventCSVManager {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     // CSV Header
-    private static final String CSV_HEADER = "eventId,name,organiser,eventType,venue,capacity,date,fee,description,fixedCost,variableCost,earlyBirdEnabled,earlyBirdEnd,earlyBirdDiscountType,earlyBirdDiscountValue,promoEnabled,promoCode,promoDiscountType,promoDiscount,status";
+    private static final String CSV_HEADER = "eventId,name,organiser,eventType,venue,capacity,date,fee,description,fixedCost,variableCost,earlyBirdEnabled,earlyBirdEnd,earlyBirdDiscountType,earlyBirdDiscountValue,promoEnabled,promoCode,promoDiscountType,promoDiscount,status,authorId,authorName";
     
     /**
      * Save events to CSV file
@@ -175,6 +175,10 @@ public class EventCSVManager {
         sb.append(event.getPromoDiscount());
         sb.append(CSV_SEPARATOR);
         sb.append(escapeCSV(event.getStatus()));
+        sb.append(CSV_SEPARATOR);
+        sb.append(escapeCSV(event.getAuthorId()));
+        sb.append(CSV_SEPARATOR);
+        sb.append(escapeCSV(event.getAuthorName()));
         
         return sb.toString();
     }
@@ -185,8 +189,8 @@ public class EventCSVManager {
     private static EventData csvLineToEvent(String csvLine) {
         String[] fields = parseCSVLine(csvLine);
         
-        if (fields.length < 20) {
-            throw new IllegalArgumentException("Invalid CSV line format - expected 20 fields, got " + fields.length);
+        if (fields.length < 22) {
+            throw new IllegalArgumentException("Invalid CSV line format - expected 22 fields, got " + fields.length);
         }
         
         try {
@@ -219,10 +223,12 @@ public class EventCSVManager {
             
             // Parse status
             String status = (fields.length > 19 && fields[19] != null && !fields[19].isEmpty()) ? fields[19] : "Active";
+            String authorId = (fields.length > 20) ? fields[20] : null;
+            String authorName = (fields.length > 21) ? fields[21] : null;
             
             return new EventData(eventId, name, organiser, eventType, venue, capacity, date, fee, description, fixedCost, variableCost,
                     earlyBirdEnabled, earlyBirdEnd, earlyBirdDiscountType, earlyBirdDiscountValue, 
-                    promoEnabled, promoCode, promoDiscountType, promoDiscount, status);
+                    promoEnabled, promoCode, promoDiscountType, promoDiscount, status, authorId, authorName);
                     
         } catch (ParseException | NumberFormatException e) {
             throw new IllegalArgumentException("Error parsing CSV fields: " + e.getMessage());

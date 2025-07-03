@@ -99,13 +99,22 @@ public class VoucherData {
      */
     public boolean isApplicableFor(double amount, int pax, String eventId, String userType) {
         if (!isCurrentlyValid()) return false;
-        
+        // Admin sees all vouchers
+        if ("Admin".equalsIgnoreCase(userType)) {
+            // But still check usage limit and time validity
+            // Already checked by isCurrentlyValid()
+        } else if ("Student".equalsIgnoreCase(userType)) {
+            if (!("ALL".equalsIgnoreCase(userTypeEligible) || "STUDENT".equalsIgnoreCase(userTypeEligible))) return false;
+        } else if ("Staff".equalsIgnoreCase(userType)) {
+            if (!("ALL".equalsIgnoreCase(userTypeEligible) || "STAFF".equalsIgnoreCase(userTypeEligible))) return false;
+        } else {
+            // For any other userType, only show if eligible is ALL
+            if (!"ALL".equalsIgnoreCase(userTypeEligible)) return false;
+        }
         // Check minimum amount
         if (amount < minimumAmount) return false;
-        
         // Check minimum pax for group discounts
         if (("GROUP".equals(voucherType) || "GROUP_ORDER".equals(voucherType)) && pax < minimumPax) return false;
-        
         // Check event eligibility
         if (!"ALL".equals(applicableEvents)) {
             String[] eventIds = applicableEvents.split(",");
@@ -118,10 +127,6 @@ public class VoucherData {
             }
             if (!eventFound) return false;
         }
-        
-        // Check user type eligibility
-        if (!"ALL".equals(userTypeEligible) && !userTypeEligible.equals(userType)) return false;
-        
         return true;
     }
     

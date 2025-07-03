@@ -366,10 +366,14 @@ class UpdateEventWindow extends CreateEventWindow {
                     }
                 }
                 
+        // Set authorId and authorName from logged-in user
+        UserData author = LoginRegisterWindow.getLoggedInUser();
+        String authorId = author != null ? author.getUserId() : null;
+        String authorName = author != null ? author.getUserName() : null;
         // Update the event using CSV operations
         EventData updatedEvent = new EventData(name, organiser, eventType, fullVenue, 
             capacity, eventDateTime, fee, desc, fixedCost, variableCost, earlyBirdEnabled, earlyBirdEnd, 
-            earlyBirdDiscountType, earlyBirdDiscountValue, promoEnabled, promoCode, promoDiscountType, promoDiscount, status);
+            earlyBirdDiscountType, earlyBirdDiscountValue, promoEnabled, promoCode, promoDiscountType, promoDiscount, status, authorId, authorName);
         
         // Update in CSV directly
         EventCSVManager.updateEventInCSV(originalEvent, updatedEvent);
@@ -391,7 +395,8 @@ class UpdateEventWindow extends CreateEventWindow {
                 // Close windows and show updated event details
                 this.dispose();
                 if (parentWindow != null) parentWindow.dispose();
-                EventDetailsWindow detailsWindow = new EventDetailsWindow(updatedEvent, mainAppRef);
+                String userType = "Student"; // Assuming a default userType
+                EventDetailsWindow detailsWindow = new EventDetailsWindow(updatedEvent, mainAppRef, userType);
                 detailsWindow.setVisible(true);
                 break;
             }

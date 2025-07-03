@@ -604,9 +604,12 @@ class CreateEventWindow extends JFrame {
             }
         }
         // Add event to main app and close window
+        UserData author = LoginRegisterWindow.getLoggedInUser();
+        String authorId = author != null ? author.getUserId() : null;
+        String authorName = author != null ? author.getUserName() : null;
         EventData event = new EventData(name, organiser, eventType, fullVenue, capacity, eventDateTime, fee, desc, fixedCost, variableCost, 
             earlyBirdEnabled, earlyBirdEnd, earlyBirdDiscountType, earlyBirdDiscountValue, 
-            promoEnabled, promoCode, promoDiscountType, promoDiscount, "Active");
+            promoEnabled, promoCode, promoDiscountType, promoDiscount, "Active", authorId, authorName);
         mainApp.addEvent(event);
         dispose();
     }

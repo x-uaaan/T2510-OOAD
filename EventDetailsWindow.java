@@ -42,7 +42,10 @@ class EventDetailsWindow extends JFrame {
         JButton updateButton = new JButton("Update");
         JButton attendeesButton = new JButton("Attendees");
         buttonPanel.add(registerButton);
-        if ("Admin".equalsIgnoreCase(userType)) {
+        String actualUserType = "STUDENT";
+        UserData user = LoginRegisterWindow.getLoggedInUser();
+        if (user != null) actualUserType = user.getUserType();
+        if ("Admin".equalsIgnoreCase(actualUserType)) {
             buttonPanel.add(updateButton);
             buttonPanel.add(attendeesButton);
         }

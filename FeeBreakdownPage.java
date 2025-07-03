@@ -75,7 +75,7 @@ class FeeBreakdownPage extends JFrame {
         }
         
         // Service Tax (6% of after-discount amount)
-        bill.append(String.format("Service Tax (6%%): RM %.2f\n", breakdown.serviceTax));
+        bill.append(String.format("\nService Tax (6%%): RM %.2f\n", breakdown.serviceTax));
         
         // Net Pay
         bill.append(String.format("Net Pay: RM %.2f", netPayable));
@@ -97,11 +97,11 @@ class FeeBreakdownPage extends JFrame {
         payButton.addActionListener(e -> {
             // Process payment and create records
             try {
-                // Get current logged in user (this would need to be passed from login system)
-                // For now, using a default user - this should be integrated with login system
-                String userId = "U0001"; // This should come from logged in user
-                String userName = "Current User"; // This should come from logged in user
-                String userType = "STUDENT"; // This should come from logged in user
+                // Get current logged in user from login system
+                UserData user = LoginRegisterWindow.getLoggedInUser();
+                String userId = user != null ? user.getUserId() : "";
+                String userName = user != null ? user.getUserName() : "";
+                String userType = user != null ? user.getUserType() : "";
                 
                 // Generate IDs
                 String registrationId = RegistrationCSVManager.generateNextRegistrationId();

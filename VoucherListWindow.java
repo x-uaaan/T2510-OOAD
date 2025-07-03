@@ -9,15 +9,21 @@ public class VoucherListWindow extends JFrame {
     private JTable voucherTable;
     private VoucherTableModel tableModel;
     private JLabel statusLabel;
-    private String currentUserType = "STUDENT"; // This should come from logged in user
+    private String currentUserType = "STUDENT";
     private EventData currentEvent = null; // Set when viewing vouchers for specific event
     
     public VoucherListWindow() {
-        this("STUDENT");
+        UserData user = LoginRegisterWindow.getLoggedInUser();
+        this.currentUserType = (user != null) ? user.getUserType() : "STUDENT";
+        initializeComponents();
+        setupLayout();
+        setProperties();
+        loadVouchers();
     }
     
     public VoucherListWindow(String userType) {
-        this.currentUserType = userType;
+        UserData user = LoginRegisterWindow.getLoggedInUser();
+        this.currentUserType = (user != null) ? user.getUserType() : userType;
         initializeComponents();
         setupLayout();
         setProperties();
@@ -25,7 +31,8 @@ public class VoucherListWindow extends JFrame {
     }
     
     public VoucherListWindow(String userType, EventData event) {
-        this.currentUserType = userType;
+        UserData user = LoginRegisterWindow.getLoggedInUser();
+        this.currentUserType = (user != null) ? user.getUserType() : userType;
         this.currentEvent = event;
         initializeComponents();
         setupLayout();
